@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>新北聯醫AI藥師小幫手</title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-        <style>
-            body {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新北聯醫AI藥師小幫手</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+    body {
                 font-family: 'Noto Sans TC', sans-serif;
                 background: linear-gradient(to right, #6a11cb, #2575fc);
                 color: #fff;
@@ -26,83 +26,95 @@
                 max-width: 600px;
                 text-align: left;
             }
-            h1 {
-                text-align: center;
-                color: #333;
-                margin-bottom: 20px;
-            }
-            label {
-                font-size: 16px;
-                margin-bottom: 10px;
-                color: #333;
-            }
-            textarea, input[type="text"], input[type="range"] {
-                width: 100%;
-                padding: 12px;
-                border-radius: 8px;
-                border: 2px solid #ddd;
-                box-sizing: border-box;
-                margin-bottom: 20px;
-            }
-            textarea {
-                height: 100px;
-                resize: none;
-            }
-            input[type="range"] {
-                -webkit-appearance: none;
-                background: #ddd;
-            }
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: #4CAF50;
-                cursor: pointer;
-            }
-            span {
-        display: block;
-        margin-bottom: 20px;
-        max-width: 30px; /* Limit the size of span elements */
-        padding: 8px; /* Adjust padding to reduce overall size */
-        background-color: #eee; /* Optional: different background to highlight */
-        border-radius: 4px; /* Optional: rounded corners for visual appeal */
-        color: #333;
-    }
-            button {
-                width: 100%;
-                padding: 15px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            }
-            button:hover {
-                background-color: #369636;
-            }
-            .footer {
-                text-align: center;
-                font-size: 14px;
-                margin-top: 20px;
-                color: #666;
-            }
-        </style>
-    </head>
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .slider-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px; /* 添加左右内边距以避免内容贴边 */
+        }
+        .slider {
+            width: 48%; /* 保持现有的宽度，确保滑动条并排显示 */
+        }
+        .result {
+            color: black; /* 将结果文字设为黑色 */
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between; /* 标签和数值平均分布 */
+            align-items: center;
+        }
+        textarea, input[type="text"], input[type="range"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: #ddd;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #369636;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
 <body>
     <div class="container">
-        <h1>新北聯醫AI藥師小幫手</h1>
-        <label for="prompt">Prompt:</label>
-        <textarea id="prompt" aria-label="Prompt">Assume you are a clinical pharmacist. Please professionally and concisely edit the following medical text to ensure accuracy and clarity. Present your revisions in English.</textarea>
-        <label for="inputText">Your Text:</label>
-        <textarea id="inputText" aria-label="Your Text" placeholder="Enter your text here"></textarea>
-        <label for="temperature">Temperature (Default 0.5):</label>
-        <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
-        <span id="tempValue">0.5</span>
-        <label for="maxTokens">Max Tokens (Default 150):</label>
-        <input type="range" id="maxTokens" min="1" max="300" step="1" value="150">
-        <span id="tokenValue">150</span>
+        <body>
+            <div class="container">
+                <h1>新北聯醫AI藥師小幫手</h1>
+                <label for="prompt">Prompt</label>
+                <textarea id="prompt" aria-label="Prompt">Assume you are a clinical pharmacist. Please professionally and concisely edit the following medical text to ensure accuracy and clarity. Present your revisions in English.</textarea>
+                <label for="inputText">Your Text</label>
+                <textarea id="inputText" aria-label="Your Text" placeholder="Enter your text here"></textarea>
+                <div class="slider-container">
+                    <div class="slider">
+                        <label for="temperature">Temperature (Default 0.5): <span id="tempValue">0.5</span></label>
+                        <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="slider">
+                        <label for="maxTokens">Max Tokens (Default 150): <span id="tokenValue">150</span></label>
+                        <input type="range" id="maxTokens" min="1" max="300" step="1" value="150">
+                    </div>
+                </div>
         <button onclick="sendTextToServer()">Submit</button>
         <div id="result" class="result"></div>
         <div class="footer">
@@ -153,7 +165,7 @@
                 if (result.error) {
                     document.getElementById('result').textContent = "Error: " + result.error.message;
                 } else {
-                    document.getElementById('result').textContent = "Result: " + result.choices[0].message.content.trim();
+                    document.getElementById('result').textContent = result.choices[0].message.content.trim();
                 }
             })
             .catch(error => {
