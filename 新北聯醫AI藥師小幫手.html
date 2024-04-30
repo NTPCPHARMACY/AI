@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新北聯醫AI藥師小幫手</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #eeeeee;
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #333;
             margin: 0;
             padding: 0;
             display: flex;
@@ -16,60 +18,125 @@
             height: 100vh;
         }
         .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 600px;
             text-align: left;
         }
         h1 {
-            color: #333;
+            color: #1a237e;
             text-align: center;
+            margin-bottom: 30px;
         }
         label {
-            margin: 10px 0 5px;
-            display: block;
-            font-size: 16px;
-            color: #666;
+            font-size: 14px;
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 5px;
         }
-        textarea, input[type="range"] {
+        textarea, input[type="range"], input[type="text"] {
             width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box; /* Ensure padding is included in width */
-            resize: none;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            color: #333;
+            box-sizing: border-box; /* Ensures padding and border are included in width */
+            margin-bottom: 10px;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+            font-size: 14px;
+        }
+        input[type="range"] {
+    -webkit-appearance: none; /* 移除默认的外观 */
+    width: 100%;
+    height: 8px; /* 设置滑动條的高度 */
+    background: #ddd; /* 滑动條的背景色 */
+    outline: none; /* 移除外轮廓 */
+    opacity: 0.7; /* 设置透明度 */
+    transition: opacity 0.2s; /* 过渡效果 */
+}
+
+/* 滑块的样式 */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* 移除默认的外观 */
+    appearance: none;
+    width: 20px; /* 滑块的宽度 */
+    height: 20px; /* 滑块的高度 */
+    border-radius: 50%; /* 圆形滑块 */
+    background: #4CAF50; /* 滑块的背景色 */
+    cursor: pointer; /* 鼠标悬停时的指针形状 */
+    box-shadow: 0 0 1px #000; /* 滑块的阴影 */
+}
+
+/* 滑块悬停时的样式 */
+input[type="range"]:hover {
+    opacity: 1; /* 提高透明度 */
+}
+
+/* Firefox 的滑块样式 */
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+/* IE 的滑块样式 */
+input[type="range"]::-ms-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+        span {
+            display: block;
+            margin-bottom: 20px;
+            max-width: 30px; /* Limit the size of span elements */
+            padding: 8px; /* Adjust padding to reduce overall size */
+            background-color: #eee; /* Optional: different background to highlight */
+            border-radius: 4px; /* Optional: rounded corners for visual appeal */
         }
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
+            padding: 12px;
+            background-color: #5c6bc0;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-weight: 500;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #3949ab;
         }
         .footer {
             text-align: center;
-            font-size: 14px;
-            color: #999;
+            font-size: 12px;
+            color: #777;
             margin-top: 20px;
         }
     </style>
+    
 </head>
 <body>
     <div class="container">
         <h1>新北聯醫AI藥師小幫手</h1>
         <label for="prompt">Prompt:</label>
-        <textarea id="prompt" rows="4" aria-label="Prompt">Assume you are a clinical pharmacist. Please professionally and concisely edit the following medical text to ensure accuracy and clarity. Present your revisions in English.</textarea>
+        <textarea id="prompt" aria-label="Prompt">Assume you are a clinical pharmacist. Please professionally and concisely edit the following medical text to ensure accuracy and clarity. Present your revisions in English.</textarea>
         <label for="inputText">Your Text:</label>
-        <textarea id="inputText" rows="4" aria-label="Your Text" placeholder="Enter your text here"></textarea>
+        <textarea id="inputText" aria-label="Your Text" placeholder="Enter your text here"></textarea>
         <label for="temperature">Temperature (Default 0.5):</label>
         <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
         <span id="tempValue">0.5</span>
@@ -82,7 +149,6 @@
             Powered by GPT-4.0
         </div>
     </div>
-
     <script>
         document.getElementById('temperature').oninput = function() {
             document.getElementById('tempValue').textContent = this.value;
@@ -95,7 +161,7 @@
             var prompt = document.getElementById('prompt').value;
             var text = document.getElementById('inputText').value;
             var temperature = parseFloat(document.getElementById('temperature').value);
-            var maxTokens = parseInt(document.getElementById('maxTokens').value, 10); // Convert string to integer
+            var maxTokens = parseInt(document.getElementById('maxTokens').value, 10);
             processText(prompt, text, temperature, maxTokens);
         }
 
