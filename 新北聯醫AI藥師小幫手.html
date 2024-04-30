@@ -40,6 +40,7 @@
             border-radius: 5px;
             border: 1px solid #ccc;
             resize: none;
+            margin-top: 20px
         }
         input[type="range"] {
             width: 100%;
@@ -129,7 +130,7 @@ function processText(prompt, text, temperature, maxTokens) {
         if (result.error) {
             document.getElementById('result').textContent = "Error: " + result.error.message;
         } else {
-            document.getElementById('result').textContent = "Result: " + result.choices[0].message.content.trim();
+            document.getElementById('result').textContent = result.choices[0].message.content.trim();
         }
     })
     .catch(error => {
