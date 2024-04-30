@@ -43,7 +43,7 @@
         }
         input[type="range"] {
             width: 100%;
-            margin: 5px 0 20px;
+            margin: 5px 0 0px;
         }
         button {
             width: 100%;
@@ -75,8 +75,10 @@
         <textarea id="inputText" rows="4" aria-label="Your Text" placeholder="Enter your text here"></textarea>
         <label for="temperature">Temperature (Default 0.5):</label>
         <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
+        <span id="tempValue">0.5</span>
         <label for="maxTokens">Max Tokens (Default 150):</label>
         <input type="range" id="maxTokens" min="1" max="300" step="1" value="150">
+        <span id="tokenValue">150</span>
         <button onclick="sendTextToServer()">Submit</button>
         <div id="result" class="result"></div>
         <div class="footer">
@@ -93,18 +95,46 @@
     };
 
     function sendTextToServer() {
-        var prompt = document.getElementById('prompt').value;
-        var text = document.getElementById('inputText').value;
-        var temperature = document.getElementById('temperature').value;
-        var maxTokens = document.getElementById('maxTokens').value;
-        document.getElementById('result').textContent = "Submitting...";
-        // 假設有 API 處理溫度和最大字元參數
-        google.script.run.withSuccessHandler(showResult).processText(prompt, text, temperature, maxTokens);
-    }
+    var prompt = document.getElementById('prompt').value;
+    var text = document.getElementById('inputText').value;
+    var temperature = parseFloat(document.getElementById('temperature').value); // 將字串轉換為浮點數
+    var maxTokens = parseInt(document.getElementById('maxTokens').value); // 將字串轉換為整數
+    document.getElementById('result').textContent = "Submitting...";
+    processText(prompt, text, temperature, maxTokens);
+}
 
-    function showResult(result) {
-        document.getElementById('result').textContent = "Result: " + result;
-    }
+function processText(prompt, text, temperature, maxTokens) {
+    var apiKey = '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';  // 请确保替换为您的实际 API 密钥
+    var data = {
+        "model": "gpt-4-turbo",
+        "messages": [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": text}
+        ],
+        "temperature": temperature,
+        "max_tokens": maxTokens
+    };
+
+    fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.error) {
+            document.getElementById('result').textContent = "Error: " + result.error.message;
+        } else {
+            document.getElementById('result').textContent = "Result: " + result.choices[0].message.content.trim();
+        }
+    })
+    .catch(error => {
+        document.getElementById('result').textContent = "Failed to process text due to an error: " + error.message;
+    });
+}
 </script>
 </body>
 </html>
