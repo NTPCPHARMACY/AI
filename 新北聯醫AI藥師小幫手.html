@@ -34,16 +34,13 @@
             font-size: 16px;
             color: #666;
         }
-        textarea {
-            width: calc(100% - 20px);
+        textarea, input[type="range"] {
+            width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box; /* Ensure padding is included in width */
             resize: none;
-        }
-        input[type="range"] {
-            width: 100%;
-            margin: 5px 0 0px;
         }
         button {
             width: 100%;
@@ -83,18 +80,26 @@
         <div id="result" class="result"></div>
         <div class="footer">
             Powered by GPT-4.0
-            Powered by GPT-4 Turbo
         </div>
     </div>
 
-<script>
-    document.getElementById('temperature').oninput = function() {
-        document.getElementById('tempValue').textContent = this.value;
-    };
-    document.getElementById('maxTokens').oninput = function() {
-        document.getElementById('tokenValue').textContent = this.value;
-    };
-function processText(prompt, text, temperature, maxTokens) {
+    <script>
+        document.getElementById('temperature').oninput = function() {
+            document.getElementById('tempValue').textContent = this.value;
+        };
+        document.getElementById('maxTokens').oninput = function() {
+            document.getElementById('tokenValue').textContent = this.value;
+        };
+
+        function sendTextToServer() {
+            var prompt = document.getElementById('prompt').value;
+            var text = document.getElementById('inputText').value;
+            var temperature = parseFloat(document.getElementById('temperature').value);
+            var maxTokens = parseInt(document.getElementById('maxTokens').value, 10); // Convert string to integer
+            processText(prompt, text, temperature, maxTokens);
+        }
+
+        function processText(prompt, text, temperature, maxTokens) {
             var apiKeyPart1 = 'sk-Eh9vh6znTSmPIZHur4hqT3Bl';
             var apiKeyPart2 = 'bkFJt1e5p9sWZZ0gE2TPConS';
             var apiKey = apiKeyPart1 + apiKeyPart2;
