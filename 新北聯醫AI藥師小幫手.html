@@ -311,7 +311,24 @@ input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;b
 // ──────────────────────────────────────────────
 // DATA
 // ──────────────────────────────────────────────
-const API_KEY = '你的_XAI_API_KEY'; // ← 貼上你的 xAI API Key
+const API_KEY_STORAGE = 'xai_api_key';
+
+function getApiKey(){
+  let key = sessionStorage.getItem(API_KEY_STORAGE);
+  if(!key){
+    key = prompt('請輸入 xAI API Key。本頁只會暫存在此瀏覽器分頁，不會寫入 GitHub 原始碼。');
+    if(key){
+      key = key.trim();
+      sessionStorage.setItem(API_KEY_STORAGE, key);
+    }
+  }
+  return key;
+}
+
+function clearApiKey(){
+  sessionStorage.removeItem(API_KEY_STORAGE);
+  showToast('API Key 已清除');
+}
 
 const TEMPLATES = [
   {
@@ -692,6 +709,9 @@ async function submit(){
   const text   = document.getElementById('inputTa').value.trim();
   if(!text){ showToast(s('emptyInput')); return; }
 
+  const apiKey = getApiKey();
+  if(!apiKey){ showToast('尚未設定 API Key'); return; }
+
   const temperature = parseFloat(document.getElementById('temperature').value);
   const maxTokens   = parseInt(document.getElementById('maxTokens').value, 10);
   const t0 = Date.now();
@@ -707,7 +727,7 @@ async function submit(){
     const res = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + API_KEY,
+        'Authorization': 'Bearer ' + apiKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
