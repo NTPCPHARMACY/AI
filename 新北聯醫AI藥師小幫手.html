@@ -1,168 +1,867 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新北聯醫AI藥師小幫手</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            width: 100%;
-            max-width: 600px;
-        }
-        h1 {
-            text-align: center;
-            color: #222;
-            margin-bottom: 20px;
-        }
-        label {
-            font-size: 16px;
-            color: #444;
-            margin-bottom: 8px;
-            display: block;
-        }
-        textarea, input[type="range"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-            resize: none;
-        }
-        textarea {
-            height: 100px;
-        }
-        .slider-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .slider {
-            flex: 1;
-            min-width: 45%;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #3e8e41;
-        }
-        .result {
-            color: #222;
-            padding: 10px;
-            margin-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-        .footer {
-            text-align: center;
-            font-size: 14px;
-            color: #888;
-            margin-top: 20px;
-        }
-        @media (max-width: 600px) {
-            .slider {
-                min-width: 100%;
-            }
-            h1 {
-                font-size: 22px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新北聯醫 AI 藥師小幫手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --navy:#0A1628; --navy-mid:#132040; --navy-card:rgba(14,24,50,0.92);
+  --blue:#1E6FD9; --blue-light:#4B9EFF; --blue-dim:rgba(30,111,217,0.12);
+  --teal:#00C2B2; --teal-dim:rgba(0,194,178,0.10);
+  --amber:#F0A500; --amber-dim:rgba(240,165,0,0.10);
+  --rose:#FF5C7A; --rose-dim:rgba(255,92,122,0.10);
+  --violet:#8B5CF6; --violet-dim:rgba(139,92,246,0.10);
+  --green:#22C55E; --green-dim:rgba(34,197,94,0.10);
+  --white:#FFFFFF; --off-white:#D8E6F8;
+  --text-dim:#7A9ABF; --border:rgba(78,120,200,0.18);
+  --radius:14px; --radius-sm:9px;
+}
+
+html,body{min-height:100vh;background:var(--navy);color:var(--white);font-family:'Noto Sans TC',sans-serif;overflow-x:hidden}
+
+/* bg */
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 10% 5%, rgba(30,111,217,0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 45% at 92% 85%, rgba(0,194,178,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 35% at 60% 40%, rgba(139,92,246,0.06) 0%, transparent 60%);
+  pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(78,120,200,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(78,120,200,0.04) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* layout */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px}
+
+/* ── TOPBAR ── */
+.topbar{width:100%;max-width:860px;display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;animation:fadeDown .5s ease both}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 18px rgba(0,194,178,0.28);flex-shrink:0}
+.brand-info{display:flex;flex-direction:column;gap:1px}
+.brand-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.3px;background:linear-gradient(90deg,#fff 40%,var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand-sub{font-size:11px;color:var(--text-dim);letter-spacing:.3px}
+
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.lang-toggle{display:flex;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.lang-btn{padding:6px 12px;font-size:12px;font-weight:600;border:none;background:transparent;color:var(--text-dim);cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.lang-btn.active{background:var(--blue);color:#fff}
+.history-btn{padding:7px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;font-family:inherit;letter-spacing:.2px}
+.history-btn:hover{border-color:var(--blue);color:var(--white)}
+
+/* ── TWO-COLUMN MAIN ── */
+.main-grid{width:100%;max-width:860px;display:grid;grid-template-columns:1fr 1fr;gap:16px;animation:fadeUp .6s ease both .1s}
+
+/* ── CARD ── */
+.card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 16px 50px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.05)}
+.card-full{grid-column:1/-1}
+
+/* section label */
+.sec-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px}
+.sec-label .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-teal{background:var(--teal);box-shadow:0 0 6px var(--teal)}
+.dot-blue{background:var(--blue-light);box-shadow:0 0 6px var(--blue-light)}
+.dot-amber{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.dot-violet{background:var(--violet);box-shadow:0 0 6px var(--violet)}
+
+/* ── TEMPLATE GRID ── */
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tpl-btn{padding:10px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;text-align:center;font-family:inherit}
+.tpl-btn:hover{border-color:rgba(78,120,200,0.4);background:rgba(30,111,217,0.08);transform:translateY(-1px)}
+.tpl-btn.active{border-color:var(--teal);background:var(--teal-dim);box-shadow:0 0 12px rgba(0,194,178,0.15)}
+.tpl-icon{font-size:18px;margin-bottom:5px;display:block}
+.tpl-name{font-size:11px;font-weight:600;color:var(--off-white);display:block;letter-spacing:.2px}
+.tpl-name-en{font-size:9px;color:var(--text-dim);display:block;margin-top:1px;letter-spacing:.3px}
+
+/* ── PROMPT AREA ── */
+.prompt-wrap{position:relative}
+textarea{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--white);font-family:'Noto Sans TC',sans-serif;font-size:13px;line-height:1.75;padding:12px 14px;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+textarea:focus{border-color:var(--blue);background:var(--blue-dim);box-shadow:0 0 0 3px rgba(30,111,217,0.10)}
+textarea::placeholder{color:rgba(122,154,191,.45)}
+#promptTa{min-height:80px;font-size:12px;color:var(--text-dim)}
+#inputTa{min-height:140px;color:var(--off-white)}
+
+.char-count{position:absolute;bottom:8px;right:10px;font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;pointer-events:none}
+
+/* ── PARAMS ── */
+.params-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.param-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.param-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.param-name{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text-dim)}
+.param-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);background:var(--teal-dim);padding:2px 7px;border-radius:5px}
+input[type="range"]{-webkit-appearance:none;width:100%;height:3px;background:rgba(78,120,200,0.18);border-radius:2px;outline:none;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px rgba(0,194,178,0.5);cursor:pointer;transition:transform .15s,box-shadow .15s}
+input[type="range"]:hover::-webkit-slider-thumb{transform:scale(1.3);box-shadow:0 0 14px rgba(0,194,178,0.7)}
+input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--teal);border:none;cursor:pointer}
+
+/* ── SUBMIT ── */
+.submit-btn{width:100%;padding:14px;background:linear-gradient(90deg,var(--blue) 0%,#1257B0 100%);border:none;border-radius:var(--radius-sm);color:#fff;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(30,111,217,0.38);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);transform:translateX(-100%);transition:transform .5s}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(30,111,217,0.52)}
+.submit-btn:hover::before{transform:translateX(100%)}
+.submit-btn:active{transform:translateY(0)}
+.submit-btn.loading{pointer-events:none;opacity:.75}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;flex-shrink:0}
+.submit-btn.loading .spinner{display:block}
+
+/* ── RESULT ── */
+.result-card{grid-column:1/-1;display:none;animation:fadeUp .4s ease both}
+.result-card.visible{display:block}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.result-meta{display:flex;align-items:center;gap:10px}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.6s ease infinite}
+.result-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--teal)}
+.result-model{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:5px;border:1px solid var(--border)}
+.result-actions{display:flex;gap:8px}
+.action-btn{padding:6px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;color:var(--text-dim);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:inherit;letter-spacing:.2px}
+.action-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-dim)}
+.action-btn.copied{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.result-body{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;white-space:pre-wrap;font-size:14px;line-height:1.85;color:var(--off-white);min-height:80px}
+.result-footer{display:flex;align-items:center;gap:16px;margin-top:10px}
+.result-stat{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace}
+.stat-dot{width:3px;height:3px;border-radius:50%;background:var(--text-dim)}
+
+.result-card.error .result-title{color:var(--rose)}
+.result-card.error .pulse-dot{background:var(--rose);box-shadow:0 0 8px var(--rose);animation:none}
+.result-card.error .result-body{border-color:rgba(255,92,122,.2);background:rgba(255,92,122,.04);color:#FFAABA}
+
+/* ── HISTORY PANEL ── */
+.history-panel{position:fixed;top:0;right:-380px;width:360px;height:100vh;background:#0D1B35;border-left:1px solid var(--border);z-index:100;transition:right .3s ease;overflow:hidden;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,0.5)}
+.history-panel.open{right:0}
+.history-panel-head{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.history-panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.close-btn{width:30px;height:30px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:7px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+.close-btn:hover{border-color:var(--rose);color:var(--rose)}
+.history-list{flex:1;overflow-y:auto;padding:12px}
+.history-list::-webkit-scrollbar{width:4px}
+.history-list::-webkit-scrollbar-track{background:transparent}
+.history-list::-webkit-scrollbar-thumb{background:rgba(78,120,200,0.25);border-radius:2px}
+.history-item{padding:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .2s}
+.history-item:hover{border-color:rgba(78,120,200,.4);background:var(--blue-dim)}
+.history-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.history-tpl-tag{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--teal);background:var(--teal-dim);padding:2px 7px;border-radius:4px}
+.history-time{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace}
+.history-preview{font-size:12px;color:var(--off-white);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6;margin-bottom:4px}
+.history-result-preview{font-size:11px;color:var(--text-dim);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.history-empty{text-align:center;padding:48px 20px;color:var(--text-dim);font-size:13px}
+.history-empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+.history-clear{width:calc(100% - 24px);margin:0 12px 12px;padding:9px;background:transparent;border:1px solid rgba(255,92,122,.2);border-radius:var(--radius-sm);color:rgba(255,92,122,.6);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.2px}
+.history-clear:hover{border-color:var(--rose);color:var(--rose);background:var(--rose-dim)}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none;backdrop-filter:blur(2px)}
+.overlay.visible{display:block}
+
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(14,24,50,0.95);border:1px solid var(--teal);border-radius:10px;padding:10px 20px;font-size:13px;color:var(--teal);z-index:200;opacity:0;transition:all .3s;pointer-events:none;backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* footer */
+.page-footer{margin-top:20px;font-size:11px;color:rgba(122,154,191,.35);text-align:center;letter-spacing:.3px}
+.page-footer span{color:rgba(0,194,178,.4)}
+
+/* animations */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+
+/* responsive */
+@media(max-width:640px){
+  .main-grid{grid-template-columns:1fr}
+  .card-full{grid-column:1}
+  .result-card{grid-column:1}
+  .tpl-grid{grid-template-columns:repeat(2,1fr)}
+  .params-row{grid-template-columns:1fr}
+  .topbar{flex-direction:column;align-items:flex-start;gap:12px}
+  .history-panel{width:100%;right:-100%}
+}
+</style>
 </head>
 <body>
-<div class="container">
-    <h1>新北聯醫AI藥師小幫手</h1>
-    <label for="prompt">Prompt</label>
-    <textarea id="prompt">Assume you are a clinical pharmacist. Please professionally and concisely edit the following medical text to ensure accuracy and clarity. Present your revisions in English.</textarea>
 
-    <label for="inputText">Your Text</label>
-    <textarea id="inputText" placeholder="Enter your text here"></textarea>
+<div class="page">
 
-    <div class="slider-container">
-        <div class="slider">
-            <label for="temperature">Temperature: <span id="tempValue">0.5</span></label>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon">💊</div>
+      <div class="brand-info">
+        <div class="brand-title" id="brandTitle">新北聯醫 AI 藥師小幫手</div>
+        <div class="brand-sub" id="brandSub">新北市立聯合醫院 · 臨床藥師智能輔助系統</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('zh')" id="langZh">中文</button>
+        <button class="lang-btn" onclick="setLang('en')" id="langEn">EN</button>
+      </div>
+      <button class="history-btn" onclick="openHistory()" id="historyBtnEl">
+        <span>🕒</span><span id="histBtnLabel">歷史記錄</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Templates + Prompt -->
+    <div class="card" style="display:flex;flex-direction:column;gap:20px">
+      <!-- Templates -->
+      <div>
+        <div class="sec-label"><span class="dot dot-teal"></span><span id="lbl-template">情境模板</span></div>
+        <div class="tpl-grid" id="tplGrid"></div>
+      </div>
+      <!-- Prompt -->
+      <div>
+        <div class="sec-label" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span class="dot dot-blue"></span><span id="lbl-prompt">系統提示詞</span>
+          </div>
+          <button style="background:none;border:none;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.2px" onclick="resetPrompt()" id="resetBtn">↩ 重設</button>
+        </div>
+        <div class="prompt-wrap">
+          <textarea id="promptTa" rows="5"></textarea>
+        </div>
+      </div>
+      <!-- Params -->
+      <div>
+        <div class="sec-label"><span class="dot dot-amber"></span><span id="lbl-params">模型參數</span></div>
+        <div class="params-row">
+          <div class="param-box">
+            <div class="param-head">
+              <span class="param-name">Temperature</span>
+              <span class="param-val" id="tempValue">0.50</span>
+            </div>
             <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.5">
+          </div>
+          <div class="param-box">
+            <div class="param-head">
+              <span class="param-name">Max Tokens</span>
+              <span class="param-val" id="tokenValue">300</span>
+            </div>
+            <input type="range" id="maxTokens" min="50" max="1000" step="10" value="300">
+          </div>
         </div>
-        <div class="slider">
-            <label for="maxTokens">Max Tokens: <span id="tokenValue">150</span></label>
-            <input type="range" id="maxTokens" min="50" max="500" step="10" value="150">
-        </div>
+      </div>
     </div>
 
-    <button onclick="sendTextToServer()">Submit</button>
+    <!-- RIGHT: Input + Submit -->
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div style="flex:1;display:flex;flex-direction:column">
+        <div class="sec-label"><span class="dot dot-violet"></span><span id="lbl-input">輸入文字</span></div>
+        <div class="prompt-wrap" style="flex:1;display:flex;flex-direction:column">
+          <textarea id="inputTa" style="flex:1;min-height:200px" id="lbl-input-ph" placeholder="在此輸入需要分析的醫療文字…"></textarea>
+          <div class="char-count" id="charCount">0</div>
+        </div>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submit()">
+        <div class="spinner" id="spinner"></div>
+        <span id="submitLabel">🚀 送出分析</span>
+      </button>
+      <!-- Quick tip -->
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.6" id="tipText">
+        選擇上方模板可快速帶入專業提示詞 · 支援繁體中文與英文輸入
+      </div>
+    </div>
 
-    <div id="result" class="result"></div>
-    <div class="footer">Powered by Grok-2</div>
+    <!-- RESULT -->
+    <div class="card result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-meta">
+          <div class="pulse-dot" id="pulseDot"></div>
+          <div class="result-title" id="resultTitle">AI 藥師回覆</div>
+          <div class="result-model">Grok-4 Fast</div>
+        </div>
+        <div class="result-actions">
+          <button class="action-btn" onclick="copyResult()" id="copyBtn">📋 <span id="copyLabel">複製</span></button>
+          <button class="action-btn" onclick="exportResult()">💾 <span id="exportLabel">匯出</span></button>
+        </div>
+      </div>
+      <div class="result-body" id="resultBody"></div>
+      <div class="result-footer">
+        <div class="result-stat" id="statTokens"></div>
+        <div class="stat-dot" id="statDotEl" style="display:none"></div>
+        <div class="result-stat" id="statTime"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">新北市立聯合醫院 · <span>AI 藥師輔助系統</span> · Powered by Grok-4 Fast · 僅供醫療專業人員參考使用</div>
 </div>
 
+<!-- History Panel -->
+<div class="overlay" id="overlay" onclick="closeHistory()"></div>
+<div class="history-panel" id="historyPanel">
+  <div class="history-panel-head">
+    <div class="history-panel-title" id="histPanelTitle">歷史記錄</div>
+    <button class="close-btn" onclick="closeHistory()">✕</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+  <button class="history-clear" onclick="clearHistory()" id="clearHistBtn">🗑 清除所有記錄</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-    document.getElementById('temperature').oninput = function () {
-        document.getElementById('tempValue').textContent = this.value;
-    };
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+const API_KEY = '你的_XAI_API_KEY'; // ← 貼上你的 xAI API Key
 
-    document.getElementById('maxTokens').oninput = function () {
-        document.getElementById('tokenValue').textContent = this.value;
-    };
+const TEMPLATES = [
+  {
+    id:'edit', icon:'🩺',
+    name:{zh:'SOAP 編修', en:'SOAP Edit'},
+    prompt:{
+      zh:`你是一位資深臨床藥師，每日撰寫藥師 SOAP note，熟悉臺灣醫院病歷書寫規範與藥物治療問題（Drug Therapy Problems, DTPs）分類架構。
 
-    function sendTextToServer() {
-        const prompt = document.getElementById('prompt').value;
-        const text = document.getElementById('inputText').value;
-        const temperature = parseFloat(document.getElementById('temperature').value);
-        const maxTokens = parseInt(document.getElementById('maxTokens').value, 10);
+任務：請修訂以下藥師 SOAP note 內容。
 
-        fetch('https://api.x.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer xai-RsLXjZIxEWhyVsEpkzFP3j9uuk0UmylBAxJVeMVhQzoEuWxaaneD3WKRaj6z1eKWeFwZ2cmaaewQIjkB',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'grok-2-latest',
-                messages: [
-                    {role: 'system', content: prompt},
-                    {role: 'user', content: text}
-                ],
-                temperature: temperature,
-                max_tokens: maxTokens,
-                stream: false
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                document.getElementById('result').textContent = "Error: " + data.error.message;
-            } else {
-                document.getElementById('result').textContent = data.choices[0].message.content.trim();
-            }
-        })
-        .catch(err => {
-            document.getElementById('result').textContent = 'Failed: ' + err.message;
-        });
+重要原則：
+- 使用者可能只貼 A、只貼 P、或貼任意段落組合
+- 你只修訂使用者貼上的內容，絕對不自行補寫未提供的段落
+- 不要提示使用者「缺少 S/O」或要求補充資料，直接針對所貼內容修訂
+
+各段修訂重點（僅針對有出現的段落）：
+A（評估）：明確識別 DTP 類別（適應症、有效性、安全性、依從性），語氣客觀精確，避免模糊推測
+P（計畫）：建議具體可執行、有優先順序，含監測指標與追蹤時間點
+S（主觀）：用藥相關症狀描述清楚，避免模糊用語
+O（客觀）：藥物名稱使用 INN、劑量單位正確（mg、mcg、mL）、檢驗值含參考值
+
+書寫規範：
+- 第三人稱客觀臨床語言（「病人」而非「你」）
+- 藥物名稱統一使用 INN，首次出現可附商品名
+- 若原文邏輯有明顯缺漏，標示【建議補充：原因】但不代為填寫
+
+輸出格式：
+【修訂後內容】（僅呈現使用者提供的段落，格式保持一致）
+【修訂說明】（條列，最多 5 項）`,
+      en:`You are a senior clinical pharmacist who writes daily pharmacist SOAP notes and is expert in Drug Therapy Problems (DTPs) classification and clinical documentation standards.
+
+TASK: Revise the pharmacist SOAP note content provided below.
+
+CRITICAL RULE:
+- The user may paste only an A section, only a P section, or any partial combination
+- Revise ONLY what the user has provided — NEVER generate or fill in missing sections
+- Do NOT prompt the user to supply missing sections; work solely with what is given
+
+REVISION FOCUS (apply only to sections present in the input):
+A (Assessment): Explicitly identify DTP category (indication, effectiveness, safety, adherence); language must be objective and precise — no vague speculation
+P (Plan): Recommendations must be specific, actionable, and prioritized; include monitoring parameters with target values and timeframes
+S (Subjective): Pharmacotherapy-relevant symptoms clearly described; no vague language
+O (Objective): INN drug names, correct dose units (mg, mcg, mL — not μg), lab values with reference ranges
+
+WRITING STANDARDS:
+- Objective third-person clinical language ("the patient" not "you")
+- INN for all drugs; trade name may follow in parentheses on first mention
+- If a logical gap exists in the original, mark it with [SUGGESTED ADDITION: reason] — do NOT fill it in
+
+OUTPUT FORMAT:
+[REVISED CONTENT] (present only the sections the user provided, maintaining their structure)
+[REVISION NOTES] (bullet list, max 5 items)`
     }
+  },
+  {
+    id:'interact', icon:'⚠️',
+    name:{zh:'藥物交互', en:'Drug Interaction'},
+    prompt:{
+      zh:`你是一位專精藥物交互作用的資深臨床藥師，熟悉 CYP450 酵素系統、P-glycoprotein 及藥效學交互機制。
+
+任務：分析以下藥物組合的交互作用，提供可立即應用於臨床的評估報告。
+
+分析框架（依序完成）：
+1. 交互作用機制（藥動學 / 藥效學 / 兩者皆有）
+2. 嚴重程度分級（Contraindicated / Major / Moderate / Minor）
+3. 臨床後果（具體描述對病人的影響）
+4. 處置建議（監測指標、劑量調整、替代藥物）
+
+注意事項：
+- 僅陳述有充分臨床依據的交互作用
+- 若資料不足，明確標示「需進一步確認」
+- 避免過度警示，聚焦於最具臨床意義的風險`,
+      en:`You are a senior clinical pharmacist specializing in drug interactions, with expertise in CYP450 enzyme systems, P-glycoprotein transport, and pharmacodynamic mechanisms.
+
+TASK: Analyze the drug combination below and deliver an actionable clinical interaction report.
+
+ANALYSIS FRAMEWORK (complete in order):
+1. Mechanism (PK: absorption/distribution/metabolism/excretion | PD: additive/synergistic/antagonistic)
+2. Severity (Contraindicated / Major / Moderate / Minor — use standard DDI classification)
+3. Clinical Consequence (specific patient-level impact: e.g., "increased risk of QTc prolongation >500ms")
+4. Management (monitoring parameters, dose adjustment range, preferred alternatives if substitution needed)
+
+CONSTRAINTS:
+- Report only interactions with established clinical evidence
+- If evidence is insufficient, explicitly state: [Insufficient evidence — monitor empirically]
+- Prioritize clinically significant risks; do not over-alert on minor interactions
+- State only what you can verify. Mark uncertain claims with [uncertain]`
+    }
+  },
+  {
+    id:'counsel', icon:'💬',
+    name:{zh:'用藥指導', en:'Counseling'},
+    prompt:{
+      zh:`你是一位擅長病人衛教的資深臨床藥師，能將複雜的藥學知識轉化為病人易懂的語言。
+
+任務：為以下藥物撰寫完整的用藥衛教內容，適合直接向病人或家屬說明。
+
+衛教內容架構：
+1. 這個藥在做什麼（功效，用淺顯文字說明，勿用醫學術語）
+2. 如何正確使用（劑量時機、與食物關係、特殊服用方式）
+3. 可能的副作用（列出最常見3項，說明應對方式）
+4. 重要注意事項（禁忌、交互作用、儲存方式）
+5. 忘記吃藥怎麼辦（補服原則）
+
+撰寫原則：
+- 使用國中程度可理解的語言
+- 不使用縮寫與英文藥學術語
+- 以第二人稱「您」稱呼病人`,
+      en:`You are a senior clinical pharmacist skilled in patient education, able to translate complex pharmacology into clear, accessible language for patients and caregivers.
+
+TASK: Write comprehensive patient counseling content for the medication(s) below, suitable for direct verbal or written delivery.
+
+COUNSELING STRUCTURE:
+1. What this medication does (plain-language mechanism, no jargon)
+2. How to take it correctly (timing, food interactions, administration technique if relevant)
+3. Side effects to expect (top 3 most common; include what to do if they occur)
+4. Important warnings (contraindications, key drug/food interactions, storage)
+5. What to do if a dose is missed (rule-based: e.g., take as soon as remembered unless within X hours of next dose)
+
+WRITING RULES:
+- Target a 6th–8th grade reading level
+- Use "you" to address the patient directly
+- NEVER use abbreviations or Latin pharmaceutical terms
+- Avoid alarming language; be honest but reassuring`
+    }
+  },
+  {
+    id:'dose', icon:'⚖️',
+    name:{zh:'劑量換算', en:'Dose Calc'},
+    prompt:{
+      zh:`你是一位資深臨床藥師，具備腎功能調整、兒科劑量換算及特殊族群用藥的豐富經驗。
+
+任務：根據以下病人資訊與藥物，執行劑量計算或換算，並提供完整的臨床推理過程。
+
+計算報告格式：
+【基本資訊確認】列出所有已知參數（體重、腎功能、年齡等）
+【計算過程】逐步展示公式與數值代入
+【建議劑量】具體劑量 + 頻次 + 給藥途徑
+【劑量上下限確認】確認建議劑量是否在安全範圍內
+【臨床注意事項】監測指標或特殊考量（若適用）
+
+重要提示：
+- 若資訊不足以進行精確計算，明確列出所需的缺漏資訊
+- 計算結果僅供參考，最終劑量由臨床醫師決定
+- 若有多種換算方法，說明選用理由`,
+      en:`You are a senior clinical pharmacist with expertise in renal dose adjustment, pediatric weight-based dosing, and pharmacokinetic calculations for special populations.
+
+TASK: Perform the dose calculation or conversion based on the patient information and medication provided below.
+
+CALCULATION REPORT FORMAT:
+[PARAMETERS CONFIRMED] List all known inputs (weight, renal function, age, indication, etc.)
+[STEP-BY-STEP CALCULATION] Show full formula, substituted values, and unit conversions
+[RECOMMENDED DOSE] Specific dose + frequency + route of administration
+[SAFETY RANGE CHECK] Confirm the recommended dose is within established therapeutic range
+[CLINICAL NOTES] Monitoring parameters or special considerations (if applicable)
+
+CONSTRAINTS:
+- If any critical information is missing, explicitly list what is needed before calculating
+- If multiple valid calculation methods exist, state which you used and why
+- Flag any dose that approaches toxicity thresholds with [SAFETY FLAG]
+- State: "This calculation is for clinical reference only; final dosing decision rests with the prescribing clinician"`
+    }
+  },
+  {
+    id:'summary', icon:'📋',
+    name:{zh:'病歷摘要', en:'Chart Summary'},
+    prompt:{
+      zh:`你是一位資深臨床藥師，負責撰寫藥師評估記錄（Pharmacist's Note）。你的評估將被納入病歷，作為多學科團隊的參考依據。
+
+任務：根據以下病歷或用藥資訊，撰寫結構化的藥師評估摘要。
+
+SOAP 格式輸出：
+S（主觀資料）：病人主訴或相關症狀（若有提及）
+O（客觀資料）：用藥清單、實驗室數值、腎肝功能等相關資訊
+A（藥師評估）：
+  - 藥物治療問題（Drug Therapy Problems, DTPs）分類與識別
+  - 藥物適當性、有效性、安全性、依從性評估
+P（建議計畫）：
+  - 具體且可執行的建議（含優先順序）
+  - 需追蹤的監測指標與時間點
+
+撰寫規範：
+- 使用客觀、精確的臨床語言
+- 每項建議須有臨床依據
+- 標示資訊不確定或需確認之處`,
+      en:`You are a senior clinical pharmacist responsible for writing a formal Pharmacist's Note to be integrated into the medical record and reviewed by a multidisciplinary team.
+
+TASK: Write a structured pharmacist assessment based on the patient chart or medication information below.
+
+OUTPUT IN SOAP FORMAT:
+S (Subjective): Patient-reported symptoms or complaints relevant to pharmacotherapy (if mentioned)
+O (Objective): Medication list, relevant lab values, renal/hepatic function, vital signs
+A (Assessment):
+  - Identify and classify Drug Therapy Problems (DTPs): unnecessary drug, wrong drug, dose too low/high, adverse reaction, needs additional drug, non-adherence
+  - Evaluate each medication for appropriateness, effectiveness, safety, and adherence
+P (Plan):
+  - Specific, actionable recommendations with clinical rationale (prioritized by urgency)
+  - Monitoring parameters with target values and timeframes
+
+WRITING STANDARDS:
+- Use precise clinical language suitable for a permanent medical record
+- Every recommendation MUST include supporting evidence or clinical reasoning
+- Mark any uncertain information with [needs confirmation]
+- State only what you can verify from the provided data`
+    }
+  },
+  {
+    id:'translate', icon:'🌐',
+    name:{zh:'醫療翻譯', en:'Med Translate'},
+    prompt:{
+      zh:`你是一位具有臨床藥學背景的資深醫療翻譯專家，精通中英醫療術語，熟悉臺灣與國際醫療慣用表達。
+
+任務：將以下醫療文字精確翻譯為英文。
+
+翻譯原則：
+- 藥物名稱：優先使用 INN（國際非專利名稱），若為商品名則保留並附 INN
+- 醫學術語：使用國際通用英文術語，不進行過度意譯
+- 計量單位：轉換為國際標準（SI units）
+- 劑型與給藥途徑：使用標準英文縮寫（PO, IV, SC, SL 等）
+- 文化慣用語：若有無對應英文表達，附上原文說明
+
+輸出格式：
+【英文翻譯】（完整譯文）
+【術語對照】（若有特殊翻譯選擇，條列中英對照，最多5項）`,
+      en:`You are a senior medical translator with a clinical pharmacy background, fluent in both English and Traditional Chinese medical terminology, and familiar with both international and Taiwan-specific clinical conventions.
+
+TASK: Translate the following medical text accurately into Traditional Chinese (繁體中文).
+
+TRANSLATION PRINCIPLES:
+- Drug names: Use the standard Taiwan NHI drug name where applicable; append INN in parentheses
+- Medical terminology: Use clinically accepted Chinese equivalents; do not paraphrase medical concepts
+- Units: Convert to Taiwan clinical standard notation where relevant
+- Routes of administration: Use standard Chinese clinical abbreviations (口服, 靜脈注射, 皮下注射, etc.)
+- If a term has no direct equivalent, transliterate and add [原文: English term] in brackets
+
+OUTPUT FORMAT:
+[中文譯文] (complete translation)
+[術語對照] (if special translation choices were made, list up to 5 English → Chinese term pairs with brief rationale)`
+    }
+  }
+];
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let lang = 'zh';
+let activeTpl = TEMPLATES[0];
+let history = JSON.parse(localStorage.getItem('pharm_history') || '[]');
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+function init() {
+  buildTemplates();
+  selectTemplate(TEMPLATES[0], false);
+  bindSliders();
+  bindCharCount();
+  renderHistory();
+  applyLang();
+}
+
+// ──────────────────────────────────────────────
+// LANGUAGE
+// ──────────────────────────────────────────────
+const STRINGS = {
+  zh:{
+    brandTitle:'新北聯醫 AI 藥師小幫手', brandSub:'新北市立聯合醫院 · 臨床藥師智能輔助系統',
+    histBtn:'歷史記錄', histPanel:'歷史記錄', clearHist:'🗑 清除所有記錄',
+    lblTemplate:'情境模板', lblPrompt:'系統提示詞', lblParams:'模型參數', lblInput:'輸入文字',
+    inputPh:'在此貼上藥師 SOAP note 草稿或其他醫療文字…',
+    reset:'↩ 重設', submit:'🚀 送出分析', submitting:'分析中…',
+    copyLbl:'複製', copied:'已複製！', exportLbl:'匯出',
+    resultTitle:'AI 藥師回覆', errorTitle:'發生錯誤',
+    tip:'選擇上方模板可快速帶入專業提示詞 · 支援繁體中文與英文輸入',
+    emptyInput:'請先輸入文字內容。', histEmpty:'尚無歷史記錄', histEmptyIcon:'🕒',
+    toastCopied:'已複製到剪貼簿', toastExported:'已匯出為文字檔'
+  },
+  en:{
+    brandTitle:'NTPC United Hospital AI Pharmacist', brandSub:'New Taipei City United Hospital · Clinical Pharmacy AI',
+    histBtn:'History', histPanel:'Query History', clearHist:'🗑 Clear All',
+    lblTemplate:'Templates', lblPrompt:'System Prompt', lblParams:'Model Params', lblInput:'Input Text',
+    inputPh:'Paste your pharmacist SOAP note draft or other medical text here…',
+    reset:'↩ Reset', submit:'🚀 Submit', submitting:'Analyzing…',
+    copyLbl:'Copy', copied:'Copied!', exportLbl:'Export',
+    resultTitle:'AI Pharmacist Reply', errorTitle:'Error',
+    tip:'Select a template above for quick professional prompts · Supports Chinese and English input',
+    emptyInput:'Please enter text to analyze.', histEmpty:'No history yet', histEmptyIcon:'🕒',
+    toastCopied:'Copied to clipboard', toastExported:'Exported as text file'
+  }
+};
+
+function s(key){ return STRINGS[lang][key] || key; }
+
+function setLang(l){
+  lang = l;
+  document.getElementById('langZh').classList.toggle('active', l==='zh');
+  document.getElementById('langEn').classList.toggle('active', l==='en');
+  applyLang();
+  // refresh template prompt
+  document.getElementById('promptTa').value = activeTpl.prompt[lang];
+  rebuildTemplateLabels();
+}
+
+function applyLang(){
+  document.getElementById('brandTitle').textContent = s('brandTitle');
+  document.getElementById('brandSub').textContent = s('brandSub');
+  document.getElementById('histBtnLabel').textContent = s('histBtn');
+  document.getElementById('histPanelTitle').textContent = s('histPanel');
+  document.getElementById('clearHistBtn').textContent = s('clearHist');
+  document.getElementById('lbl-template').textContent = s('lblTemplate');
+  document.getElementById('lbl-prompt').textContent = s('lblPrompt');
+  document.getElementById('lbl-params').textContent = s('lblParams');
+  document.getElementById('lbl-input').textContent = s('lblInput');
+  document.getElementById('inputTa').placeholder = s('inputPh');
+  document.getElementById('resetBtn').textContent = s('reset');
+  document.getElementById('submitLabel').textContent = s('submit');
+  document.getElementById('copyLabel').textContent = s('copyLbl');
+  document.getElementById('exportLabel').textContent = s('exportLbl');
+  document.getElementById('tipText').textContent = s('tip');
+}
+
+// ──────────────────────────────────────────────
+// TEMPLATES
+// ──────────────────────────────────────────────
+function buildTemplates(){
+  const grid = document.getElementById('tplGrid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tpl-btn';
+    btn.id = 'tpl-'+t.id;
+    btn.onclick = () => selectTemplate(t);
+    btn.innerHTML = `<span class="tpl-icon">${t.icon}</span><span class="tpl-name">${t.name.zh}</span><span class="tpl-name-en">${t.name.en}</span>`;
+    grid.appendChild(btn);
+  });
+}
+
+function rebuildTemplateLabels(){
+  TEMPLATES.forEach(t => {
+    const el = document.getElementById('tpl-'+t.id);
+    if(el) el.querySelector('.tpl-name').textContent = t.name[lang];
+  });
+}
+
+function selectTemplate(t, animate=true){
+  activeTpl = t;
+  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tpl-'+t.id);
+  if(btn){ btn.classList.add('active'); if(animate) btn.style.animation='none'; }
+  const ta = document.getElementById('promptTa');
+  ta.value = t.prompt[lang];
+  if(animate){ ta.style.animation='none'; ta.offsetHeight; ta.style.animation='fadeUp .3s ease'; }
+}
+
+function resetPrompt(){
+  document.getElementById('promptTa').value = activeTpl.prompt[lang];
+}
+
+// ──────────────────────────────────────────────
+// SLIDERS
+// ──────────────────────────────────────────────
+function bindSliders(){
+  document.getElementById('temperature').oninput = function(){ document.getElementById('tempValue').textContent = parseFloat(this.value).toFixed(2); };
+  document.getElementById('maxTokens').oninput = function(){ document.getElementById('tokenValue').textContent = this.value; };
+}
+
+function bindCharCount(){
+  const ta = document.getElementById('inputTa');
+  const cc = document.getElementById('charCount');
+  ta.oninput = () => { cc.textContent = ta.value.length; };
+}
+
+// ──────────────────────────────────────────────
+// SUBMIT
+// ──────────────────────────────────────────────
+async function submit(){
+  const prompt = document.getElementById('promptTa').value.trim();
+  const text   = document.getElementById('inputTa').value.trim();
+  if(!text){ showToast(s('emptyInput')); return; }
+
+  const temperature = parseFloat(document.getElementById('temperature').value);
+  const maxTokens   = parseInt(document.getElementById('maxTokens').value, 10);
+  const t0 = Date.now();
+
+  // loading
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  document.getElementById('submitLabel').textContent = s('submitting');
+  document.getElementById('spinner').style.display = 'block';
+  hideResult();
+
+  try {
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'grok-4-fast',
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user',   content: text }
+        ],
+        temperature,
+        max_tokens: maxTokens,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+
+    if(data.error){ showResult(data.error.message, true, elapsed, null); }
+    else {
+      const reply = data.choices?.[0]?.message?.content?.trim() || '（無回應）';
+      const usage = data.usage || {};
+      showResult(reply, false, elapsed, usage);
+      addHistory({ tpl:activeTpl.id, tplName:activeTpl.name, input:text, result:reply, time:new Date().toISOString(), elapsed });
+    }
+  } catch(e){
+    showResult(e.message, true, null, null);
+  } finally {
+    btn.classList.remove('loading');
+    document.getElementById('submitLabel').textContent = s('submit');
+    document.getElementById('spinner').style.display = 'none';
+  }
+}
+
+// ──────────────────────────────────────────────
+// RESULT
+// ──────────────────────────────────────────────
+function showResult(text, isError, elapsed, usage){
+  const card = document.getElementById('resultCard');
+  card.className = 'card result-card visible' + (isError ? ' error' : '');
+  document.getElementById('resultTitle').textContent = isError ? s('errorTitle') : s('resultTitle');
+  document.getElementById('resultBody').textContent = text;
+  document.getElementById('pulseDot').style.animation = isError ? 'none' : 'pulse 1.6s ease infinite';
+
+  // stats
+  const statTokens = document.getElementById('statTokens');
+  const statTime   = document.getElementById('statTime');
+  const dot        = document.getElementById('statDotEl');
+  if(usage && usage.total_tokens){
+    statTokens.textContent = `${usage.total_tokens} tokens`;
+    statTokens.style.display = 'flex';
+    dot.style.display = 'block';
+  } else { statTokens.style.display='none'; dot.style.display='none'; }
+  if(elapsed){ statTime.textContent = `${elapsed}s`; statTime.style.display='flex'; }
+  else statTime.style.display='none';
+
+  card.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function hideResult(){ document.getElementById('resultCard').className='card result-card'; }
+
+// ──────────────────────────────────────────────
+// COPY / EXPORT
+// ──────────────────────────────────────────────
+function copyResult(){
+  const text = document.getElementById('resultBody').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const lbl = document.getElementById('copyLabel');
+    btn.classList.add('copied');
+    lbl.textContent = s('copied');
+    showToast(s('toastCopied'));
+    setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = s('copyLbl'); }, 2000);
+  });
+}
+
+function exportResult(){
+  const text = document.getElementById('resultBody').textContent;
+  const prompt = document.getElementById('promptTa').value;
+  const input  = document.getElementById('inputTa').value;
+  const ts = new Date().toLocaleString('zh-TW');
+  const content = `新北聯醫 AI 藥師小幫手 - 查詢記錄\n${'─'.repeat(40)}\n時間：${ts}\n模板：${activeTpl.name.zh} / ${activeTpl.name.en}\n\n【系統提示詞】\n${prompt}\n\n【輸入文字】\n${input}\n\n【AI 回覆】\n${text}\n`;
+  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `AI藥師_${ts.replace(/[/:]/g,'-')}.txt`; a.click();
+  showToast(s('toastExported'));
+}
+
+// ──────────────────────────────────────────────
+// HISTORY
+// ──────────────────────────────────────────────
+function addHistory(item){
+  history.unshift(item);
+  if(history.length > 50) history = history.slice(0,50);
+  localStorage.setItem('pharm_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  if(!history.length){
+    list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">${s('histEmptyIcon')}</div>${s('histEmpty')}</div>`;
+    return;
+  }
+  list.innerHTML = history.map((h,i) => {
+    const tpl = TEMPLATES.find(t=>t.id===h.tpl) || {name:{zh:h.tplName?.zh||'',en:h.tplName?.en||''}};
+    const ts = new Date(h.time);
+    const timeStr = `${ts.getMonth()+1}/${ts.getDate()} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
+    return `<div class="history-item" onclick="loadHistory(${i})">
+      <div class="history-item-head">
+        <span class="history-tpl-tag">${tpl.name.zh}</span>
+        <span class="history-time">${timeStr}</span>
+      </div>
+      <div class="history-preview">${h.input}</div>
+      <div class="history-result-preview">↳ ${h.result}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadHistory(i){
+  const h = history[i];
+  document.getElementById('inputTa').value = h.input;
+  document.getElementById('charCount').textContent = h.input.length;
+  const tpl = TEMPLATES.find(t=>t.id===h.tpl);
+  if(tpl) selectTemplate(tpl);
+  showResult(h.result, false, h.elapsed, null);
+  closeHistory();
+}
+
+function clearHistory(){
+  history = []; localStorage.removeItem('pharm_history');
+  renderHistory();
+}
+
+function openHistory(){
+  document.getElementById('historyPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('visible');
+}
+function closeHistory(){
+  document.getElementById('historyPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('visible');
+}
+
+// ──────────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ──────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>
